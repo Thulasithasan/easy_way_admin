@@ -106,6 +106,7 @@ export default function CategoriesPage() {
   // Archive
   const handleArchive = async (category: Category) => {
     if (!category.categoryId) return;
+    setLoading(true);
     try {
       await categoriesAPI.changeStatus(category.categoryId);
       toast.success(
@@ -129,12 +130,14 @@ export default function CategoriesPage() {
         err.response?.data?.results?.[0]?.message ||
           "Failed to change category status"
       );
+    } finally {
+      setLoading(false);
     }
   };
 
   const columns = [
-    { key: "name", label: "Category Name", align : "left" },
-    { key: "description", label: "Description", align : "left"  },
+    { key: "name", label: "Category Name", align: "left" },
+    { key: "description", label: "Description", align: "left" },
     {
       key: "isActive",
       label: "Status",
@@ -148,7 +151,7 @@ export default function CategoriesPage() {
     {
       key: "actions",
       label: "Actions",
-      align: "center" ,
+      align: "center",
       render: (_: any, row: Category) => (
         <div className="flex items-center gap-2 justify-center">
           <PermissionGuard permission="Category" subPermission="edit">
@@ -228,6 +231,7 @@ export default function CategoriesPage() {
                 <form
                   onSubmit={async (e) => {
                     e.preventDefault();
+                    setLoading(true);
                     try {
                       if (editingCategory?.categoryId) {
                         await categoriesAPI.update(
@@ -236,18 +240,17 @@ export default function CategoriesPage() {
                         );
                         toast.success("Category updated successfully!");
                         setCategories((prev) =>
-                        prev.map((cat) =>
-                          cat.categoryId === editingCategory?.categoryId
-                            ? { ...cat, ...formData }
-                            : cat
-                        )
-                      );
+                          prev.map((cat) =>
+                            cat.categoryId === editingCategory?.categoryId
+                              ? { ...cat, ...formData }
+                              : cat
+                          )
+                        );
                       } else {
                         await categoriesAPI.create(formData);
                         toast.success("Category created successfully!");
                         setCategories((prev) => [formData, ...prev]);
                       }
-                      setIsEditDialogOpen(false);
                       
                     } catch (err: any) {
                       console.error(err);
@@ -255,6 +258,9 @@ export default function CategoriesPage() {
                         err.response?.data?.results?.[0]?.message ||
                           "Failed to save category"
                       );
+                    } finally {
+                      setLoading(false);
+                      setIsEditDialogOpen(false);
                     }
                   }}
                 >
@@ -294,7 +300,7 @@ export default function CategoriesPage() {
                   </div>
 
                   <DialogFooter>
-                    <Button type="submit">
+                    <Button type="submit" loading={loading}>
                       {editingCategory ? "Update" : "Create"}
                     </Button>
                   </DialogFooter>
@@ -331,6 +337,7 @@ export default function CategoriesPage() {
                       categoryToToggle?.isActive ? "destructive" : "default"
                     }
                     onClick={() => handleArchive(categoryToToggle!)}
+                    loading={loading}
                   >
                     {categoryToToggle?.isActive ? "Archive" : "Activate"}
                   </Button>
