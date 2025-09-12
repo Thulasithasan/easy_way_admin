@@ -82,8 +82,8 @@
 
 import axios from "axios"
 
-const API_BASE_URL = "http://localhost:8080"
-// const API_BASE_URL = "https://easy-way-be.thulasi-web.space"
+// const API_BASE_URL = "http://localhost:8080"
+const API_BASE_URL = "https://easy-way-be.thulasi-web.space"
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
