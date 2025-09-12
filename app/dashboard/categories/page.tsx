@@ -41,7 +41,6 @@ export default function CategoriesPage() {
     isActive: true,
   });
 
-  // fetchCategories - accepts server params
   const fetchCategories = useCallback(
     async (params?: {
       page?: number;
@@ -87,10 +86,11 @@ export default function CategoriesPage() {
     [page, pageSize]
   );
 
-  useEffect(() => {
-    // initial load
-    fetchCategories({ page, pageSize });
-  }, [fetchCategories, pageSize]);
+  // useEffect(() => {
+  //   // initial load
+  //   debugger
+  //   fetchCategories({ page, pageSize });
+  // }, [fetchCategories, pageSize]);
 
   // Edit -> populate form
   const handleEdit = (category: Category) => {
@@ -121,7 +121,6 @@ export default function CategoriesPage() {
             : cat
         )
       );
-      // fetchCategories({ page, pageSize });
       setIsArchiveDialogOpen(false);
     } catch (err: any) {
       toast.error;
@@ -250,7 +249,6 @@ export default function CategoriesPage() {
                       }
                       setIsEditDialogOpen(false);
                       
-                      // fetchCategories({ page: 1, pageSize });
                     } catch (err: any) {
                       console.error(err);
                       toast.error(
@@ -341,7 +339,6 @@ export default function CategoriesPage() {
             </Dialog>
           </PermissionGuard>
         }
-        // When table needs data, it calls this; fetchCategories will do the API call
         onRequestData={({
           page: p = 1,
           pageSize: ps = 5,
