@@ -20,6 +20,8 @@ import { categoriesAPI } from "@/lib/category-api";
 import { toast } from "sonner";
 import type { Category } from "@/lib/store";
 import { set } from "date-fns";
+import { Textarea } from "@/components/ui/textarea";
+import { de } from "zod/v4/locales";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -86,13 +88,6 @@ export default function CategoriesPage() {
     [page, pageSize]
   );
 
-  // useEffect(() => {
-  //   // initial load
-  //   debugger
-  //   fetchCategories({ page, pageSize });
-  // }, [fetchCategories, pageSize]);
-
-  // Edit -> populate form
   const handleEdit = (category: Category) => {
     setEditingCategory(category);
     setFormData({
@@ -111,7 +106,7 @@ export default function CategoriesPage() {
       await categoriesAPI.changeStatus(category.categoryId);
       toast.success(
         `Category "${category.name}" ${
-          category.isActive ? "archived" : "activated"
+          category.isActive ? "deactivated" : "activated"
         } successfully!`
       );
       // re-fetch current page
@@ -143,8 +138,8 @@ export default function CategoriesPage() {
       label: "Status",
       align: "left",
       render: (value: boolean) => (
-        <Badge variant={value ? "default" : "secondary"}>
-          {value ? "Active" : "Archive"}
+        <Badge variant={value ? "success" : "danger"}>
+          {value ? "Active" : "Inactive"}
         </Badge>
       ),
     },
@@ -205,6 +200,7 @@ export default function CategoriesPage() {
         total={total}
         filters={filters}
         searchPlaceholder="Search categories..."
+        loading={loading}
         actions={
           <PermissionGuard permission="Category" subPermission="create">
             <Dialog
@@ -226,8 +222,7 @@ export default function CategoriesPage() {
                   Add Category
                 </Button>
               </DialogTrigger>
-
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent className="sm:max-w-[500px]">
                 <form
                   onSubmit={async (e) => {
                     e.preventDefault();
@@ -251,7 +246,6 @@ export default function CategoriesPage() {
                         toast.success("Category created successfully!");
                         setCategories((prev) => [formData, ...prev]);
                       }
-                      
                     } catch (err: any) {
                       console.error(err);
                       toast.error(
@@ -263,44 +257,55 @@ export default function CategoriesPage() {
                       setIsEditDialogOpen(false);
                     }
                   }}
+                  className="space-y-6"
                 >
                   <DialogHeader>
-                    <DialogTitle>
+                    <DialogTitle className="text-xl font-semibold">
                       {editingCategory ? "Edit Category" : "Add New Category"}
                     </DialogTitle>
-                    <DialogDescription>
+                    <DialogDescription className="text-sm text-muted-foreground">
                       {editingCategory
                         ? "Update the category information below."
                         : "Create a new category for your products."}
                     </DialogDescription>
                   </DialogHeader>
 
-                  <div className="grid gap-4 py-4">
-                    <Input
-                      placeholder="Category Name"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          name: e.target.value,
-                        }))
-                      }
-                      required
-                    />
-                    <Input
-                      placeholder="Description"
-                      value={formData.description}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          description: e.target.value,
-                        }))
-                      }
-                    />
+                  <div className="grid gap-5">
+                    <div className="grid gap-2">
+                      <label htmlFor="name">Category Name</label>
+                      <Input
+                        id="name"
+                        placeholder="Enter category name"
+                        value={formData.name}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
+                        required
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <label htmlFor="description">Description</label>
+                      <Textarea
+                        id="description"
+                        placeholder="Enter category description"
+                        value={formData.description}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            description: e.target.value,
+                          }))
+                        }
+                        rows={4}
+                      />
+                    </div>
                   </div>
 
                   <DialogFooter>
-                    <Button type="submit" loading={loading}>
+                    <Button variant="success" type="submit" className="w-full" loading={loading}>
                       {editingCategory ? "Update" : "Create"}
                     </Button>
                   </DialogFooter>
@@ -315,12 +320,12 @@ export default function CategoriesPage() {
                 <DialogHeader>
                   <DialogTitle>
                     {categoryToToggle?.isActive
-                      ? "Archive Category"
+                      ? "Deactivate Category"
                       : "Activate Category"}
                   </DialogTitle>
                   <DialogDescription>
                     {categoryToToggle?.isActive
-                      ? `Are you sure you want to archive "${categoryToToggle?.name}"?`
+                      ? `Are you sure you want to deactivate "${categoryToToggle?.name}"?`
                       : `Do you want to activate "${categoryToToggle?.name}"?`}
                   </DialogDescription>
                 </DialogHeader>
@@ -334,12 +339,15 @@ export default function CategoriesPage() {
                   </Button>
                   <Button
                     variant={
-                      categoryToToggle?.isActive ? "destructive" : "default"
+                      categoryToToggle?.isActive ? "danger" : "success"
                     }
                     onClick={() => handleArchive(categoryToToggle!)}
+                    loadingText={
+                      categoryToToggle?.isActive ? "deactivate" : "activate"
+                    }
                     loading={loading}
                   >
-                    {categoryToToggle?.isActive ? "Archive" : "Activate"}
+                    {categoryToToggle?.isActive ? "Deactivate" : "Activate"}
                   </Button>
                 </DialogFooter>
               </DialogContent>
