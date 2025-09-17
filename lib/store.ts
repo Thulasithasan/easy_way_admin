@@ -45,6 +45,14 @@ export interface Category {
   isActive: boolean;
 }
 
+export interface Subcategory {
+  subcategoryId?: number
+  name: string;
+  description: string;
+  categoryId?: number;
+  isActive: boolean;
+}
+
 
 export const useAuthStore = create<AuthState>()(
   persist(
